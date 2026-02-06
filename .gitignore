@@ -1,0 +1,32 @@
+# Executables
+*.exe
+*.out
+*.app
+bin/
+build/
+dist/
+
+# Object files and libraries
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+.idea/
+*.iml
+
+# Divers
+.DS_Store
+Thumbs.db
+
+# Game ROMs
+roms/*.ch8
+roms/*.bin
+!roms/test_opcode.ch8
