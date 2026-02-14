@@ -38,8 +38,13 @@ class Keyboard:
         return self.keys[key]
 
     def wait_key(self):
-        while self.last_key is None:
-            self.update()
-        k = self.last_key
         self.last_key = None
-        return k
+
+        while self.last_key is None:
+            events = pygame.event.get()
+            self.update(events)
+            pygame.time.wait(10)
+
+        key = self.last_key
+        self.last_key = None
+        return key

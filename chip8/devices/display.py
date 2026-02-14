@@ -29,6 +29,8 @@ class Display:
         # quirks
         self.clip_quirk = False  # True pour certains ROMs modernes
 
+        self.font = pygame.font.SysFont("consolas", 18)
+
     def clear(self):
         """Efface l’écran"""
         self.buffer = [[0 for _ in range(self.width)] for _ in range(self.height)]
@@ -70,6 +72,29 @@ class Display:
 
         return collision
 
+    def draw_keypad_overlay(self):
+        keypad_text = [
+            "CHIP-8 KEYPAD",
+            "",
+            "1 2 3 4",
+            "Q W E R",
+            "A S D F",
+            "Z X C V"
+        ]
+
+        overlay_width = 180
+        overlay_height = 140
+
+        overlay = pygame.Surface((overlay_width, overlay_height))
+        overlay.set_alpha(180)
+        overlay.fill((20, 20, 20))
+
+        self.screen.blit(overlay, (10, 10))
+
+        for i, line in enumerate(keypad_text):
+            text_surface = self.font.render(line, True, (255, 255, 255))
+            self.screen.blit(text_surface, (20, 20 + i * 20))
+
     def render(self):
         """Affiche le buffer à l'écran"""
         for y in range(self.height):
@@ -80,6 +105,7 @@ class Display:
                     color,
                     (x * self.scale, y * self.scale, self.scale, self.scale)
                 )
+        self.draw_keypad_overlay()
         pygame.display.flip()
 
     def set_clip_quirk(self, enabled: bool):
