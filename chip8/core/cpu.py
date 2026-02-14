@@ -4,6 +4,7 @@ from chip8.system.config import ENABLE_SCHIP
 from chip8.debug.tracer import Tracer
 from chip8.debug.breakpoints import Breakpoints
 from chip8.system.config import SHIFT_QUIRK
+from chip8.system.config import LOAD_STORE_QUIRK
 
 
 class CPU:
@@ -279,7 +280,6 @@ class CPU:
         elif i.nn == 0x29:
             self.reg.I = 0x50 + (V[i.x] * 5)
 
-
         elif i.nn == 0x33:
             if self.reg.I + 2 >= len(self.mem.ram):
                 raise MemoryError("BCD write out of bounds")
@@ -288,14 +288,14 @@ class CPU:
             self.mem.ram[self.reg.I + 1] = (val // 10) % 10
             self.mem.ram[self.reg.I + 2] = val % 10
 
-
         elif i.nn == 0x55:
             end = self.reg.I + i.x
             if end >= len(self.mem.ram):
                 raise MemoryError("Memory write out of bounds")
             for idx in range(i.x + 1):
                 self.mem.ram[self.reg.I + idx] = V[idx]
-            if ENABLE_SCHIP:
+            # Comportement original = I est incrémenté
+            if not LOAD_STORE_QUIRK:
                 self.reg.I += i.x + 1
 
         elif i.nn == 0x65:
@@ -304,7 +304,8 @@ class CPU:
                 raise MemoryError("Memory write out of bounds")
             for idx in range(i.x + 1):
                 V[idx] = self.mem.ram[self.reg.I + idx]
-            if ENABLE_SCHIP:
+            # Comportement original = I est incrémenté
+            if not LOAD_STORE_QUIRK:
                 self.reg.I += i.x + 1
 
         else:
