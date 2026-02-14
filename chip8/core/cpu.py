@@ -3,6 +3,7 @@ from chip8.core.instruction import Instruction
 from chip8.system.config import ENABLE_SCHIP
 from chip8.debug.tracer import Tracer
 from chip8.debug.breakpoints import Breakpoints
+from chip8.system.config import SHIFT_QUIRK
 
 
 class CPU:
@@ -202,17 +203,31 @@ class CPU:
             V[0xF] = 1 if V[x] > V[y] else 0
             V[x] = (V[x] - V[y]) & 0xFF
 
+
         elif i.n == 0x6:
-            V[0xF] = V[x] & 1
-            V[x] >>= 1
+            if SHIFT_QUIRK:
+                # Mode moderne
+                V[0xF] = V[x] & 1
+                V[x] >>= 1
+            else:
+                # Mode original COSMAC VIP
+                V[0xF] = V[y] & 1
+                V[x] = V[y] >> 1
 
         elif i.n == 0x7:
             V[0xF] = 1 if V[y] > V[x] else 0
             V[x] = (V[y] - V[x]) & 0xFF
 
+
         elif i.n == 0xE:
-            V[0xF] = (V[x] >> 7) & 1
-            V[x] = (V[x] << 1) & 0xFF
+            if SHIFT_QUIRK:
+                # Mode moderne
+                V[0xF] = (V[x] >> 7) & 1
+                V[x] = (V[x] << 1) & 0xFF
+            else:
+                # Mode original COSMAC VIP
+                V[0xF] = (V[y] >> 7) & 1
+                V[x] = (V[y] << 1) & 0xFF
 
         else:
             raise ValueError(f"Invalid 8XY opcode: {hex(i.opcode)}")
