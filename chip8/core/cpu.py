@@ -223,18 +223,21 @@ class CPU:
 
     def _opcode_ex(self, i):
         key = self.reg.V[i.x]
+        subcode = i.opcode & 0x00FF
 
         if key > 0xF:
-            return
+            return  # sécurité
 
-        if i.nn == 0x9E and self.keyboard.is_pressed(key):
-            self.reg.PC += 2
+        if subcode == 0x9E:
+            if self.keyboard.is_pressed(key):
+                self.reg.PC += 2
 
-        elif i.nn == 0xA1 and not self.keyboard.is_pressed(key):
-            self.reg.PC += 2
+        elif subcode == 0xA1:
+            if not self.keyboard.is_pressed(key):
+                self.reg.PC += 2
 
         else:
-            raise ValueError(f"Invalid EX opcode: {hex(i.opcode)}")
+            print(f"Warning: Unknown EX opcode {hex(i.opcode)}")
 
     # =====================================================
     # FX**
