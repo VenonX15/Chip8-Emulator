@@ -1,6 +1,6 @@
 import random
 from chip8.core.instruction import Instruction
-from chip8.system.config import ENABLE_SCHIP
+from chip8.system.config import ENABLE_SCHIP, FONT_SCHIP_START, FONT_CHIP8_START
 from chip8.debug.tracer import Tracer
 from chip8.debug.breakpoints import Breakpoints
 from chip8.system.config import SHIFT_QUIRK
@@ -159,19 +159,32 @@ class CPU:
         self.reg.V[i.x] = random.getrandbits(8) & i.nn
 
     def _drw(self, i):
-        start = self.reg.I
-        end = start + i.n
+        x = self.reg.V[i.x]
+        y = self.reg.V[i.y]
 
-        if end > len(self.mem.ram):
-            raise MemoryError("Sprite out of bounds")
+        # Déterminer nombre de lignes à dessiner
+        n = i.n
+        if ENABLE_SCHIP and n == 0:
+            n = 16  # SCHIP high-res sprite
 
-        sprite = self.mem.ram[start:end]
+        sprite = self.mem.ram[self.reg.I:self.reg.I + n]
+        collision = 0
 
-        collision = self.display.draw_sprite(
-            self.reg.V[i.x],
-            self.reg.V[i.y],
-            sprite
-        )
+        for row, byte in enumerate(sprite):
+            # SCHIP 16-bit sprite -> 2 octets par ligne
+            if ENABLE_SCHIP and byte > 0xFF:
+                line_bytes = [(byte >> 8) & 0xFF, byte & 0xFF]
+            else:
+                line_bytes = [byte]
+
+            for bit_offset, b in enumerate(line_bytes):
+                for bit in range(8):
+                    if b & (0x80 >> bit):
+                        px = (x + bit + bit_offset * 8) % self.display.width
+                        py = (y + row) % self.display.height
+                        if self.display.buffer[py][px] == 1:
+                            collision = 1
+                        self.display.buffer[py][px] ^= 1
 
         self.reg.V[0xF] = 1 if collision else 0
 
@@ -277,8 +290,13 @@ class CPU:
         elif i.nn == 0x1E:
             self.reg.I = (self.reg.I + V[i.x]) & 0xFFF
 
+
         elif i.nn == 0x29:
-            self.reg.I = 0x50 + (V[i.x] * 5)
+            val = V[i.x]
+            if ENABLE_SCHIP and self.display.width == 128:  # high-res
+                self.reg.I = FONT_SCHIP_START + val * 10  # chaque caractère = 10 bytes
+            else:
+                self.reg.I = FONT_CHIP8_START + val * 5  # CHIP-8 classique = 5 bytes
 
         elif i.nn == 0x33:
             if self.reg.I + 2 >= len(self.mem.ram):
