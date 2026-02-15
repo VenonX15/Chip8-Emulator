@@ -175,8 +175,8 @@ class Display:
                     (x * self.scale, y * self.scale, self.scale, self.scale)
                 )
 
-        if key_state:
-            self.draw_live_keypad_overlay(key_state)
+        #if key_state:
+        #    self.draw_live_keypad_overlay(key_state)
 
         pygame.display.flip()
 
