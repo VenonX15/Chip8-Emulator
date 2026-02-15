@@ -9,25 +9,36 @@ def load_rom_into_memory(memory, rom_path, start=0x200):
     for i, byte in enumerate(rom_data):
         memory.ram[start + i] = byte
 
+    return len(rom_data)
 
-def analyze_rom_for_keys(memory, start=0x200):
+
+def analyze_rom_for_keys(memory, rom_size, start=0x200):
     used_registers = set()
 
     pc = start
-    while pc < len(memory.ram) - 1:
+    end = start + rom_size
+
+    while pc < end - 1:
         opcode = (memory.ram[pc] << 8) | memory.ram[pc + 1]
 
-        if (opcode & 0xF0FF) in (0xE09E, 0xE0A1):
+        # EX9E - SKP Vx
+        if (opcode & 0xF0FF) == 0xE09E:
             vx = (opcode & 0x0F00) >> 8
             used_registers.add(vx)
 
-        if (opcode & 0xF0FF) == 0xF00A:
+        # EXA1 - SKNP Vx
+        elif (opcode & 0xF0FF) == 0xE0A1:
+            vx = (opcode & 0x0F00) >> 8
+            used_registers.add(vx)
+
+        # FX0A - LD Vx, K
+        elif (opcode & 0xF0FF) == 0xF00A:
             vx = (opcode & 0x0F00) >> 8
             used_registers.add(vx)
 
         pc += 2
 
-    return sorted(list(used_registers))
+    return sorted(used_registers)
 
 
 def build_controls_list(used_registers):

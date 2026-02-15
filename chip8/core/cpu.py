@@ -13,6 +13,7 @@ class CPU:
         self.reg = registers
         self.display = display
         self.keyboard = keyboard
+        self.used_keys = set()
 
         self.debug = debug
         self.tracer = Tracer()
@@ -251,11 +252,14 @@ class CPU:
     # =====================================================
 
     def _opcode_ex(self, i):
-        key = self.reg.V[i.x]
+        key = self.reg.V[i.x] & 0xF
         subcode = i.opcode & 0x00FF
 
         if key > 0xF:
-            return  # sécurité
+            return
+
+        # 🔥 Track dynamic key usage
+        self.used_keys.add(key)
 
         if subcode == 0x9E:
             if self.keyboard.is_pressed(key):
@@ -279,7 +283,9 @@ class CPU:
             V[i.x] = self.reg.delay_timer
 
         elif i.nn == 0x0A:
-            V[i.x] = self.keyboard.wait_key()
+            key = self.keyboard.wait_key()
+            V[i.x] = key
+            self.used_keys.add(key)
 
         elif i.nn == 0x15:
             self.reg.delay_timer = V[i.x]

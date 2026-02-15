@@ -1,11 +1,7 @@
 import os
 import pygame
 from chip8.system.emulator import Emulator
-from chip8.system.rom_loader import (
-    load_rom_into_memory,
-    analyze_rom_for_keys,
-    build_controls_list
-)
+
 
 def rom_menu():
     pygame.init()
@@ -15,18 +11,22 @@ def rom_menu():
     font = pygame.font.SysFont("consolas", 24)
 
     roms = [f for f in os.listdir("roms") if f.endswith(".ch8")]
+
+    if not roms:
+        raise FileNotFoundError("No .ch8 ROMs found in /roms directory")
+
     selected = 0
 
     while True:
         screen.fill((0, 0, 0))
 
-        title = font.render("Select a ROM (ENTER to launch)", True, (255,255,255))
+        title = font.render("Select a ROM (ENTER to launch)", True, (255, 255, 255))
         screen.blit(title, (100, 50))
 
         for i, rom in enumerate(roms):
-            color = (0,255,0) if i == selected else (255,255,255)
+            color = (0, 255, 0) if i == selected else (255, 255, 255)
             text = font.render(rom, True, color)
-            screen.blit(text, (150, 120 + i*30))
+            screen.blit(text, (150, 120 + i * 30))
 
         pygame.display.flip()
 
@@ -41,21 +41,14 @@ def rom_menu():
                 elif event.key == pygame.K_DOWN:
                     selected = (selected + 1) % len(roms)
                 elif event.key == pygame.K_RETURN:
+                    pygame.display.quit()  # Ferme la fenêtre menu proprement
                     return os.path.join("roms", roms[selected])
 
 
 if __name__ == "__main__":
-    emu = Emulator()
     rom_path = rom_menu()
 
-    # Load ROM properly
-    load_rom_into_memory(emu.memory, rom_path)
-
-    # Detect controls
-    used_registers = analyze_rom_for_keys(emu.memory)
-    controls = build_controls_list(used_registers)
-
-    # Show overlay
-    emu.display.show_controls_overlay(os.path.basename(rom_path), controls)
+    emu = Emulator()
+    emu.load_rom(rom_path)
 
     emu.run()
