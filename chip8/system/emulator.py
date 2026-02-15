@@ -8,6 +8,7 @@ from chip8.devices.keyboard import Keyboard, REVERSE_KEYMAP
 from chip8.timing.timers import Timers
 from chip8.system.config import CPU_HZ, TIMER_HZ
 from chip8.debug.debugger import Debugger
+from chip8.devices.sound import AudioDevice
 
 class Emulator:
     def __init__(self):
@@ -17,6 +18,7 @@ class Emulator:
         self.keyboard = Keyboard()
         self.cpu = CPU(self.memory, self.registers, self.display, self.keyboard)
         self.timers = Timers(self.registers)
+        self.audio = AudioDevice()
 
         self.cpu_period = 1.0 / CPU_HZ
         self.timer_period = 1.0 / TIMER_HZ
@@ -73,6 +75,12 @@ class Emulator:
             while self.timer_accumulator >= self.timer_period:
                 self.timers.update()
                 self.timer_accumulator -= self.timer_period
+
+            # Sound control
+            if self.registers.sound_timer > 0:
+                self.audio.start()
+            else:
+                self.audio.stop()
 
             # Render
             self.display.render(self.keyboard.keys)

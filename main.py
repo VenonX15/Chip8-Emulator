@@ -4,6 +4,7 @@ from chip8.system.emulator import Emulator
 
 
 def rom_menu():
+    pygame.mixer.pre_init(44100, -16, 1, 512)
     pygame.init()
     screen = pygame.display.set_mode((600, 400))
     pygame.display.set_caption("Select ROM")
