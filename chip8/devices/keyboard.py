@@ -19,6 +19,8 @@ KEYMAP = {
     pygame.K_v: 0xF,
 }
 
+REVERSE_KEYMAP = {v: k for k, v in KEYMAP.items()}
+
 class Keyboard:
     def __init__(self):
         self.keys = [False]*16

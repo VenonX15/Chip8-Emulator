@@ -18,6 +18,7 @@ class Display:
         self.height = HIGH_RES_HEIGHT if high_res else LOW_RES_HEIGHT
         self.scale = PIXEL_SCALE
 
+        self.fullscreen = False
         self.screen = pygame.display.set_mode(
             (self.width * self.scale, self.height * self.scale)
         )
@@ -34,6 +35,19 @@ class Display:
     def clear(self):
         """Efface l’écran"""
         self.buffer = [[0 for _ in range(self.width)] for _ in range(self.height)]
+
+    def toggle_fullscreen(self):
+        self.fullscreen = not self.fullscreen
+
+        if self.fullscreen:
+            self.screen = pygame.display.set_mode(
+                (0, 0),
+                pygame.FULLSCREEN | pygame.SCALED
+            )
+        else:
+            self.screen = pygame.display.set_mode(
+                (self.width * self.scale, self.height * self.scale)
+            )
 
     def draw_sprite(self, x: int, y: int, sprite: list[int]) -> int:
         """
@@ -72,28 +86,49 @@ class Display:
 
         return collision
 
-    def draw_keypad_overlay(self):
-        keypad_text = [
-            "CHIP-8 KEYPAD",
-            "",
-            "1 2 3 4",
-            "Q W E R",
-            "A S D F",
-            "Z X C V"
-        ]
+    def show_controls_overlay(self, title: str, controls: list[str]):
+        waiting = True
 
-        overlay_width = 180
-        overlay_height = 140
+        overlay_width = 500
+        overlay_height = 300
 
-        overlay = pygame.Surface((overlay_width, overlay_height))
-        overlay.set_alpha(180)
-        overlay.fill((20, 20, 20))
+        center_x = (self.width * self.scale - overlay_width) // 2
+        center_y = (self.height * self.scale - overlay_height) // 2
 
-        self.screen.blit(overlay, (10, 10))
+        big_font = pygame.font.SysFont("consolas", 28)
+        small_font = pygame.font.SysFont("consolas", 22)
 
-        for i, line in enumerate(keypad_text):
-            text_surface = self.font.render(line, True, (255, 255, 255))
-            self.screen.blit(text_surface, (20, 20 + i * 20))
+        while waiting:
+            self.screen.fill((0, 0, 0))
+
+            # boîte centrale
+            overlay = pygame.Surface((overlay_width, overlay_height))
+            overlay.set_alpha(230)
+            overlay.fill((15, 15, 15))
+            self.screen.blit(overlay, (center_x, center_y))
+
+            # titre
+            title_text = big_font.render(title + " - Controls", True, (0, 255, 0))
+            self.screen.blit(title_text, (center_x + 40, center_y + 30))
+
+            # contrôles
+            for i, line in enumerate(controls):
+                text = small_font.render(line, True, (255, 255, 255))
+                self.screen.blit(text, (center_x + 60, center_y + 90 + i * 35))
+
+            # bouton
+            ok_text = small_font.render("Press ENTER to Start", True, (255, 255, 0))
+            self.screen.blit(ok_text, (center_x + 110, center_y + overlay_height - 60))
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        waiting = False
 
     def render(self):
         """Affiche le buffer à l'écran"""
@@ -105,7 +140,6 @@ class Display:
                     color,
                     (x * self.scale, y * self.scale, self.scale, self.scale)
                 )
-        self.draw_keypad_overlay()
         pygame.display.flip()
 
     def set_clip_quirk(self, enabled: bool):

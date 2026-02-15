@@ -1,6 +1,11 @@
 import os
 import pygame
 from chip8.system.emulator import Emulator
+from chip8.system.rom_loader import (
+    load_rom_into_memory,
+    analyze_rom_for_keys,
+    build_controls_list
+)
 
 def rom_menu():
     pygame.init()
@@ -11,9 +16,8 @@ def rom_menu():
 
     roms = [f for f in os.listdir("roms") if f.endswith(".ch8")]
     selected = 0
-    running = True
 
-    while running:
+    while True:
         screen.fill((0, 0, 0))
 
         title = font.render("Select a ROM (ENTER to launch)", True, (255,255,255))
@@ -39,8 +43,19 @@ def rom_menu():
                 elif event.key == pygame.K_RETURN:
                     return os.path.join("roms", roms[selected])
 
+
 if __name__ == "__main__":
     emu = Emulator()
     rom_path = rom_menu()
-    emu.load_rom(rom_path)
+
+    # Load ROM properly
+    load_rom_into_memory(emu.memory, rom_path)
+
+    # Detect controls
+    used_registers = analyze_rom_for_keys(emu.memory)
+    controls = build_controls_list(used_registers)
+
+    # Show overlay
+    emu.display.show_controls_overlay(os.path.basename(rom_path), controls)
+
     emu.run()
