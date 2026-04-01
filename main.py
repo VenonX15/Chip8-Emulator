@@ -1,6 +1,7 @@
 import pygame 
 from chip8 import Chip8, Display
 import os
+from tkinter import Tk, filedialog
 
 
 def menu():
@@ -32,6 +33,9 @@ def menu():
         line2 = font.render("2 - PONG 2 joueur", True, (255, 255, 255))
         screen.blit(line2, (200, 200))
 
+        line3 = font.render("3 - CHOISIR UNE ROM", True, (255, 255, 255))
+        screen.blit(line3, (200, 250))
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -40,6 +44,22 @@ def menu():
             if event.type == pygame.KEYDOWN:
                 if event.key in roms:
                     return roms[event.key]
+                
+                if event.key == pygame.K_3:                    
+
+                    root = Tk()
+                    root.withdraw()
+
+                    file_path = filedialog.askopenfilename(
+                        title="Choisir une ROM CHIP-8",
+                        filetypes=[("CHIP-8 ROMs", "*.ch8")]
+                    )
+
+                    root.destroy()
+                    pygame.display.init()
+
+                    if file_path:
+                        return file_path
 
         pygame.display.flip()
         clock.tick(60)
