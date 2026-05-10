@@ -22,7 +22,7 @@ class MainMenu:
         self.title_font = pygame.font.SysFont("consolas", 80, bold=True)
         self.menu_font = pygame.font.SysFont("consolas", 36)
 
-        self.options = ["Games", "Settings", "Quit"]
+        self.options = ["Games", "Quit"]
         self.selected = 0
 
         # Mapping des touches pour éviter les IF en cascade
