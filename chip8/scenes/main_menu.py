@@ -61,7 +61,7 @@ class MainMenu:
                     self._trigger_selection()
 
     def _trigger_selection(self):
-        actions = ["games", "settings", "quit"]
+        actions = ["games", "quit"]
         self.next_scene = actions[self.selected]
 
     def draw(self, screen):
