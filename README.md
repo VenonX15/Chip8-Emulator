@@ -90,8 +90,8 @@ pip install -r requirements.txt
 **1. Cloner le dépôt**
 
 ```bash
-git clone https://github.com/VenonX15/chip8-emulator.git
-cd chip8-emulator
+git clone https://github.com/VenonX15/Chip8-Emulator.git
+cd Chip8-Emulator
 ```
 
 **2. (Recommandé) Créer un environnement virtuel**
