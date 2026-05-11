@@ -5,25 +5,27 @@ from chip8.system.config import (
     PIXEL_SCALE, ENABLE_SCHIP
 )
 
-COLOR_ON = (255, 255, 255)
-COLOR_OFF = (0, 0, 0)
+COLOR_ON = (255, 255, 255)  # Pixel allumé = blanc
+COLOR_OFF = (0, 0, 0)       # Pixel éteint = noir
 
 
 class Display:
+    """Gère l'affichage de l'émulateur."""
     def __init__(self, high_res: bool = False):
         pygame.init()
 
         self.high_res = high_res
+        # Résolution selon le mode choisi
         self.width = HIGH_RES_WIDTH if high_res else LOW_RES_WIDTH
         self.height = HIGH_RES_HEIGHT if high_res else LOW_RES_HEIGHT
-        self.scale = PIXEL_SCALE
+        self.scale = PIXEL_SCALE    # Agrandissement des pixels (ex: 1 pixel CHIP-8 = 10px réels)
         self.base_resolution = (self.width * self.scale, self.height * self.scale)
 
         self.fullscreen = False
         self.screen = pygame.display.set_mode(
             (self.width * self.scale, self.height * self.scale)
         )
-        pygame.display.set_caption("CHIP-8 / SCHIP Emulator")
+        pygame.display.set_caption("CHIP-8 / SCHIP Emulator")   #(SCHIP = haute résolution)
 
         # buffer[y][x] = 0 ou 1
         self.buffer = [[0 for _ in range(self.width)] for _ in range(self.height)]
@@ -34,10 +36,11 @@ class Display:
         self.font = pygame.font.SysFont("consolas", 18)
 
     def clear(self):
-        """Efface l’écran"""
+        """Efface l'écran"""
         self.buffer = [[0 for _ in range(self.width)] for _ in range(self.height)]
 
     def toggle_fullscreen(self):
+        """Bascule entre le mode fenêtré et plein écran."""
         self.fullscreen = not self.fullscreen
 
         if self.fullscreen:
@@ -76,24 +79,26 @@ class Display:
 
                     if self.clip_quirk:
                         if px >= self.width or py >= self.height:
-                            continue
+                            continue    # On ignore les pixels hors écran
                     else:
-                        px %= self.width
+                        px %= self.width    # On enroule autour de l'écran
                         py %= self.height
 
                     if self.buffer[py][px]:
-                        collision = 1
+                        collision = 1   # Un pixel allumé va être éteint = collision
 
-                    self.buffer[py][px] ^= 1
+                    self.buffer[py][px] ^= 1    # On inverse le pixel (allumé <-> éteint)
 
         return collision
 
     def show_controls_overlay(self, title: str, controls: list[str]):
+        """Affiche un écran de contrôles et attend que l'utilisateur appuie sur ENTRÉE."""
         waiting = True
 
         overlay_width = 500
         overlay_height = 300
 
+        # Position centrée sur l'écran
         center_x = (self.width * self.scale - overlay_width) // 2
         center_y = (self.height * self.scale - overlay_height) // 2
 
@@ -130,11 +135,13 @@ class Display:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        waiting = False
+                        waiting = False # On quitte la boucle et on démarre
 
     def draw_live_keypad_overlay(self, key_state):
+        """Affiche le pavé numérique du CHIP-8 en superposition, en vert si appuyé."""
         font = pygame.font.SysFont("consolas", 18)
 
+        # Disposition des 16 touches du CHIP-8 (comme sur la machine originale)
         keypad_layout = [
             [0x1, 0x2, 0x3, 0xC],
             [0x4, 0x5, 0x6, 0xD],
@@ -159,11 +166,13 @@ class Display:
 
                 pygame.draw.rect(self.screen, color, (x, y, box_size, box_size), border_radius=6)
 
+                # Affiche le nom de la touche (ex: "A", "F"...)
                 label = font.render(hex(key)[2:].upper(), True, (0, 0, 0))
                 text_rect = label.get_rect(center=(x + box_size // 2, y + box_size // 2))
                 self.screen.blit(label, text_rect)
 
     def render(self, key_state=None):
+        """Dessine tous les pixels du buffer sur la fenêtre."""
         self.screen.fill((0, 0, 0))
 
         for y in range(self.height):
@@ -178,7 +187,7 @@ class Display:
         #if key_state:
         #    self.draw_live_keypad_overlay(key_state)
 
-        pygame.display.flip()
+        pygame.display.flip()   # On envoie l'image à l'écran
 
     def set_clip_quirk(self, enabled: bool):
         """Active/désactive le clip pour certains ROMs"""
