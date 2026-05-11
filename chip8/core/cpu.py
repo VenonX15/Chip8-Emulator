@@ -1,3 +1,4 @@
+# Brianna - Ajout test - Je découvre le code CHIP-8
 import random
 from chip8.core.instruction import Instruction
 from chip8.system.config import ENABLE_SCHIP, FONT_SCHIP_START, FONT_CHIP8_START
