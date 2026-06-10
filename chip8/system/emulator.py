@@ -74,7 +74,7 @@ class Emulator:
                 self.cpu.cycle()
                 self.cpu_accumulator -= self.cpu_period
 
-            # Détection dynamique des contrôles (ton code actuel)
+            # Détection dynamique des contrôles
             if not self.control_detection_done:
                 if time.perf_counter() - self.start_time > self.control_detection_time:
                     used = sorted(self.cpu.used_keys)

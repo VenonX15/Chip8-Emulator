@@ -47,7 +47,7 @@ class GamesMenu:
                 shutil.copy(file_path, dest_path)
 
             self.refresh_roms()
-            # --- PETIT AJOUT ICI ---
+
             if len(self.roms) == 1:
                 self.selected = 0
 
