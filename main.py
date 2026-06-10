@@ -42,8 +42,7 @@ def main():
             # Ajoute ici le cas "settings" si besoin
 
         elif current_state == "GAMES_MENU":
-            # Ton GamesMenu actuel possède sa propre boucle 'while True' interne
-            # Il renvoie soit le chemin de la ROM, soit "back"
+            # GamesMenu renvoie soit le chemin de la ROM, soit "back"
             result = games_menu.run()
 
             if result == "back":
@@ -51,7 +50,6 @@ def main():
             else:
                 # Si c'est un chemin de ROM, on lance l'émulateur
                 launch_emulator(result)
-                # --- LA CORRECTION EST ICI ---
                 # Une fois emu.run() terminé, on redéfinit la taille du menu
                 screen = pygame.display.set_mode((width, height))
                 # On force le rafraîchissement du GamesMenu avec le nouvel écran
@@ -65,7 +63,7 @@ def main():
 def launch_emulator(rom_path):
     """Initialise et lance l'émulateur avec la ROM choisie"""
     try:
-        emu = Emulator()  # Assure-toi que l'Emulator n'appelle pas pygame.init() à nouveau
+        emu = Emulator()  
         emu.load_rom(rom_path)
         emu.run()
     except Exception as e:
